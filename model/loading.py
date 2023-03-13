@@ -46,7 +46,7 @@ if __name__ == "__main__":
         info = parts[2]
 
         tuples.append((y, x, weight, info))
-        # print(f"{y} {x}")
+        #print(f"{y} {x}")
 
     if container_above(tuples, target):
         print("Container above target")
