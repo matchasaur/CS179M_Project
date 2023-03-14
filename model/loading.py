@@ -1,42 +1,94 @@
-def load(tuples):
+
+def retrieve_container():
     pass
 
-def container_above(tuples, target):
-    y = int(target[0]) + 1
-    x = int(target[1])
-    print(y)
-    print(x)
-    for i in range(len(tuples)):
-        if int(tuples[i][0]) == y and int(tuples[i][1]) == x:
-            print(tuple[i])
-            if tuples[i][3] == "UNUSED":
-                return False
-            else:
-                return True
-            break
+############ COLLISION CHECK ##############
 
-    print("Couldn't find container")
-    return True
-            
+def container_above(arr, target):
+    y = target[0]
+    x = target[1]
+    if arr[y+1][x][1] == "UNUSED":
+        return False
+    else:
+        return True
+    
+def container_left(arr, target):
+    y = target[0]-1
+    x = target[1]-1
+    if arr[y][x-1][1] == "UNUSED":
+        return False
+    else:
+        return True
+    
+def container_right(arr, target):
+    y = target[0]
+    x = target[1]
+    if arr[y][x+1][1] == "UNUSED":
+        return False
+    else:
+        return True
+    
+def container_below(arr, targe):
+    y = target[0]-1
+    x = target[1]-1
+    if arr[y-1][x][1] == "UNUSED":
+        return False
+    else:
+        return True
+
+############# OPERATIONS #################
+
+def move_up(arr, target):
+    if not container_above(arr, target):
+        y = target[0]-1
+        x = target[1]-1
+        arr[y][x], arr[y+1][x] = arr[y+1][x], arr[y][x]
+        target = (y+2, x+1)
+    else:
+        print("Container in the way")
+        return target
+
+    return target
+
+def move_down(arr, target):
+    if not container_below(arr, target):
+        y = target[0]-1
+        x = target[1]-1
+        arr[y][x], arr[y-1][x] = arr[y-1][x], arr[y][x]
+        target = (y, x+1)
+    else:
+        print("Container in the way")
+        return target
+
+    return target
+
+def move_left(arr, target):
+    if not container_left(arr, target):
+        y = target[0]-1
+        x = target[1]-1
+        arr[y][x], arr[y][x-1] = arr[y][x-1], arr[y][x]
+        target = (y+1, x)
+    else:
+        print("Container in the way")
+        return target
+
+def move_right(arr, target):
+    if not container_right(arr, target):
+        y = target[0]-1
+        x = target[1]-1
+        arr[y][x], arr[y][x+1] = arr[y][x+1], arr[y][x]
+        target = (y+1, x+2)
+    else:
+        print("Container in the way")
+        return target
 
 
+############### READ MANIFEST ##################
 
-if __name__ == "__main__":
+def make_arr(file):
+    arr = [[None for x in range(12)] for y in range(8)]
 
-    # Temporary (for testing different target crates)
-    # y_in, x_in = input("What are the coordinates of the target container? (y, x)\n").split(" ")
-    # print(F"Target container: {y_in}, {x_in}")
-    target = ("01", "03", "10001", "Ewe")
-
-    # Opens manifest
-    f = open('ShipCase3.txt', 'r')
-
-    tuples = []
-    i = 0
-
-    # Parses manifest for each containers coordinates, weight, and info
-    # y, x, weight, info stored in a list of tuples
-    for line in f:
+    for line in file:
         parts = line.strip().split(", ")
         if len(parts) != 3:
             continue
@@ -45,14 +97,23 @@ if __name__ == "__main__":
         weight = parts[1].strip("{}")
         info = parts[2]
 
-        tuples.append((y, x, weight, info))
-        # print(f"{y} {x}")
+        tuple = (weight, info)
+        arr[int(y)-1][int(x)-1] = tuple
 
-    if container_above(tuples, target):
-        print("Container above target")
-    else:
-        print("No container above target")
+    return arr
 
-    # print(tuples)
-    f.close()
 
+if __name__ == "__main__":
+    file = open('ShipCase3.txt', 'r')
+    target = (1, 3)
+
+    arr = make_arr(file)
+
+    print(target)
+    target = move_up(arr, target)
+    print(target)
+    target = move_right(arr, target)
+    print(target)
+    target = move_right(arr, target)
+    target = move_down(arr, target)
+    print(target)
