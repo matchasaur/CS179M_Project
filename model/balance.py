@@ -39,15 +39,15 @@ class Node:
         leftWeight = 0
         rightWeight = 0
         
-        for i in cargo:
-            for j in i:
-                if (j.x < 3):
-                    leftWeight += j.weight
+        for i in range(2):
+            for j in range(6):
+                if (j < 3):
+                    leftWeight += cargo[i][j].weight
                 else:
-                    rightWeight += j.weight
+                    rightWeight += cargo[i][j].weight
         score = min(leftWeight,rightWeight)/max(leftWeight,rightWeight) 
         #//////////////////////////// DEBUG MESSAGE ///////////////////////////
-        print(score)
+        #print(score)
         return score
     
     def columnNotEmpty(self, column):
@@ -112,7 +112,11 @@ def search(start):
     while not queue.isEmpty():
         #Grab the node at the top of the queue
         currNode = queue.pop()
-        displayCargo(currNode.cargo)
+        #///////////////////// DEBUG MESSAGE /////////////////////////
+        print("func::search(): Observing this cargo: ")
+        displayWeight(currNode.cargo)
+        currNode.updateBalance()
+        print("Balance Score: ", currNode.balanceScore)
         print()
         #If the node is admissible, we can sail
         if isAdmissible(currNode):
@@ -151,8 +155,7 @@ def expandHelper(node, coordinates, queue, setOfVisitedNodes, parent):
             tempNode.cargo[y][i].name = node.cargo[coordinates[0]][coordinates[1]].name
             tempNode.cargo[coordinates[0]][coordinates[1]].clear()
             #////////////////////////////DEBUG MESSAGE////////////////////////////////
-            displayCargo(tempNode.cargo)
-            print()
+            #displayCargo(tempNode.cargo); print()
             if not setOfVisitedNodes.isRepeated(tempNode.cargo):
                 priority = tempNode.cost + 1 + tempNode.calculateBalance(tempNode.cargo)
                 tempNode.cost =+ 1
@@ -175,6 +178,12 @@ def displayCargo(shipcargo):
     for i in shipcargo:
         for j in i:
             print(j.name.center(12), ' ', end='')
+        print('')
+        
+def displayWeight(shipcargo):
+    for i in shipcargo:
+        for j in i:
+            print(str(j.weight).center(12), ' ', end='')
         print('')
 
 if __name__ == "__main__":
