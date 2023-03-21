@@ -1,15 +1,20 @@
 from queue import PriorityQueue
 import heapq
 import copy
+import timeit
 
 #PriorityQueue implementation
 class PriorityQueue:
     def __init__(self):
         self.nodes = []
+        heapq.heapify(self.nodes)
+        
+    # def insert(self, currNode):
+    #     heapq.heappush(self.nodes,currNode)
         
     def insert(self, currNode, priority):
-        heapq.heappush(self.nodes, (priority, currNode))
-        
+        heapq.heappush(self.nodes, (priority, currNode))    
+    
     def pop(self):
         return heapq.heappop(self.nodes)[1]
     
@@ -26,22 +31,25 @@ class Node:
         self.cost = 0
         
     def __lt__(self, other):
-        Fn = self.cost + self.balanceScore
-        Pn = other.cost + other.balanceScore
+        Fn = self.cost + (1 - self.balanceScore)
+        Pn = other.cost + (1 - other.balanceScore)
         if (Fn == Pn): return self.cost < other.cost
         else:
             return Fn < Pn  
         
     def updateBalance(self):
         self.balanceScore = self.calculateBalance(self.cargo)
+        
+    def updateCost(self, time):
+        self.cost = time
     
     def calculateBalance(self, cargo):
         leftWeight = 0
         rightWeight = 0
         
-        for i in range(2):
-            for j in range(6):
-                if (j < 3):
+        for i in range(rows):
+            for j in range(columns):
+                if (j < columns/2):
                     leftWeight += cargo[i][j].weight
                 else:
                     rightWeight += cargo[i][j].weight
@@ -52,15 +60,17 @@ class Node:
     
     def columnNotEmpty(self, column):
         #Checks if any containers in the column are not named UNUSED
-        for i in range(2):
-            if(self.cargo[i][column].name != 'UNUSED'):
+        for i in reversed(range(rows)):
+            if(self.cargo[i][column].name != 'UNUSED' and self.cargo[i][column].name != 'NAN'):
                 return i,column
         return -1,-1
     
     def nearestContainer(self, column):
-        for i in range(2):
-            if(self.cargo[i][column].name != 'UNUSED'):
-                return i-1, column
+        for i in reversed(range(rows)):
+            if(self.cargo[i][column].name != 'UNUSED' and self.cargo[i][column].name != 'NAN'):
+                return i+1, column
+            elif(self.cargo[i][column].name == 'NAN'):
+                return i+1, column
         return i, column
     
 class Container:
@@ -81,8 +91,8 @@ class cargoHash():
         
     def hashFunction(self, cargo):
         hashValue = 0
-        for i in range(2):
-            for j in range(6):
+        for i in reversed(range(rows)):
+            for j in range(columns):
                 hashValue += cargo[i][j].weight*(i+1)*(j+1)
         #////////////////////////////DEBUG MESSAGE////////////////////////////////
         #print("func::cargoHash(): hashvalue: ", hashValue)
@@ -104,7 +114,8 @@ def search(start):
     setOfVisitedNodes = cargoHash()
     setOfVisitedNodes.insertItem(start.cargo)
     queue = PriorityQueue()
-    queue.insert(start, start.balanceScore + start.cost)
+    queue.insert(start, (1-start.balanceScore) + start.cost)
+    # queue.insert(start)
     parent = {}
     parent[start] = None
 
@@ -112,16 +123,16 @@ def search(start):
     while not queue.isEmpty():
         #Grab the node at the top of the queue
         currNode = queue.pop()
-        #///////////////////// DEBUG MESSAGE /////////////////////////
-        print("func::search(): Observing this cargo: ")
-        displayWeight(currNode.cargo)
+        # ///////////////////// DEBUG MESSAGE /////////////////////////
+        # print("func::search(): Observing this cargo: ")
+        # displayCargo(currNode.cargo)
         currNode.updateBalance()
-        print("Balance Score: ", currNode.balanceScore)
-        print()
+        # print("Balance Score: ", currNode.balanceScore)
+        # print()
         #If the node is admissible, we can sail
         if isAdmissible(currNode):
             print("Yo we found the goal!!!!!!!")
-            print(currNode.balanceScore, ', ', currNode.cost)
+            print("balanceScore: ", currNode.balanceScore, ', ', 'cost: ', currNode.cost)
             displayCargo(currNode.cargo)
             return currNode
 
@@ -129,36 +140,41 @@ def search(start):
         expandNode(currNode, queue, setOfVisitedNodes, parent)
 
     print("Yo we didn't find the goal...")
+    
+def manhatDist(x1, x2, y1, y2):
+    return (abs(x2-x1) + abs(y2-y1))*4
+
 
 def expandNode(nodeToExpand, queue, setOfVisitedNodes, parent):
     #We cycle the crane over each column, left to right
-    for i in range(6):
+    for i in range(columns):
         #Find the columns that are not empty
         if((-1,-1) != nodeToExpand.columnNotEmpty(i)):
             #Expand this container by moving it to a valid position
             coordinates = nodeToExpand.columnNotEmpty(i)
             #////////////////////////////DEBUG MESSAGE////////////////////////////////
-            #print("func::expandNode(): ", coordinates)
-            #print("func::expandNode(): Shifting container: ", nodeToExpand.cargo[coordinates[0]][coordinates[1]].name)
+            # print("func::expandNode(): ", coordinates)
+            # print("func::expandNode(): Shifting container: ", nodeToExpand.cargo[coordinates[0]][coordinates[1]].name)
             expandHelper(nodeToExpand, coordinates, queue, setOfVisitedNodes, parent)
             
 #helper function
 def expandHelper(node, coordinates, queue, setOfVisitedNodes, parent):
     #For each column, find a valid cell to move the container to
-    for i in range(6):
+    for i in range(columns):
         y, x = node.nearestContainer(i)
         #////////////////////////////DEBUG MESSAGE////////////////////////////////
-        #print("func::expandHelper(): We are looking at location:", y, ' ', x)
-        if (i != coordinates[1] and y != -1):
+        # print("func::expandHelper(): We are looking at location:", y, ' ', x)
+        if (i != coordinates[1] and y != rows):
             tempNode = copy.deepcopy(node)
             tempNode.cargo[y][i].weight = node.cargo[coordinates[0]][coordinates[1]].weight
             tempNode.cargo[y][i].name = node.cargo[coordinates[0]][coordinates[1]].name
             tempNode.cargo[coordinates[0]][coordinates[1]].clear()
             #////////////////////////////DEBUG MESSAGE////////////////////////////////
-            #displayCargo(tempNode.cargo); print()
+            # displayCargo(tempNode.cargo); print()
             if not setOfVisitedNodes.isRepeated(tempNode.cargo):
-                priority = tempNode.cost + 1 + tempNode.calculateBalance(tempNode.cargo)
-                tempNode.cost =+ 1
+                newCost = manhatDist(coordinates[0], x, coordinates[1], y) + node.cost
+                tempNode.updateCost(newCost)
+                priority = newCost + (1 - tempNode.calculateBalance(tempNode.cargo))
                 tempNode.updateBalance()
                 setOfVisitedNodes.insertItem(tempNode.cargo)
                 parent[tempNode] = node
@@ -175,23 +191,28 @@ def isAdmissible(node):
 
 #Menial functions...
 def displayCargo(shipcargo):
-    for i in shipcargo:
-        for j in i:
+    for i in reversed(shipcargo):
+        for j in (i):
             print(j.name.center(12), ' ', end='')
         print('')
         
 def displayWeight(shipcargo):
-    for i in shipcargo:
-        for j in i:
+    for i in reversed(shipcargo):
+        for j in reversed(i):
             print(str(j.weight).center(12), ' ', end='')
         print('')
 
 if __name__ == "__main__":
     #First things first, we need to populate a list of lists with the information of the manifest
+    global columns, rows 
+    columns = 12
+    rows = 8
     
-    file = open('model/balanceTest1.txt', 'r')
     
-    shipcargo = [[0] * 6 for i in range(2)]
+    
+    file = open('ShipCase3.txt', 'r')
+    
+    shipcargo = [[0] * columns for i in range(rows)]
     
     
     for line in file:
@@ -216,7 +237,11 @@ if __name__ == "__main__":
     testNode = Node(shipcargo)
     
     print("Attempting to balance...")
+    starttime = timeit.default_timer()
     search(testNode)
+    stoptime = timeit.default_timer()
+    execution_time = stoptime - starttime
+    print("Program ran in ", str(execution_time), " seconds.")
     # print(testNode.balanceScore)
     # print(testNode.columnNotEmpty(5))
     
