@@ -1,119 +1,96 @@
+class Node:
+    def __init__(self, grid, targets, parent, g, h, move):
+        self.grid = grid
+        self.g = g
+        self.h = h
+        self.parent = None
+        self.targets = targets
+        self.parent = parent
+        self.move = move
+        self.airborn_container = None
 
-def retrieve_container():
-    pass
+    def f(self):
+        return self.g + self.h
 
-############ COLLISION CHECK ##############
+    def __str__(self):
+        rows = []
+        for row in self.grid:
+            rows.append(' '.join(str(cell) for cell in row))
+        return '\n'.join(rows)
 
-def container_above(arr, target):
-    y = target[0]
-    x = target[1]
-    if arr[y+1][x][1] == "UNUSED":
-        return False
-    else:
-        return True
-    
-def container_left(arr, target):
-    y = target[0]-1
-    x = target[1]-1
-    if arr[y][x-1][1] == "UNUSED":
-        return False
-    else:
-        return True
-    
-def container_right(arr, target):
-    y = target[0]
-    x = target[1]
-    if arr[y][x+1][1] == "UNUSED":
-        return False
-    else:
-        return True
-    
-def container_below(arr, targe):
-    y = target[0]-1
-    x = target[1]-1
-    if arr[y-1][x][1] == "UNUSED":
-        return False
-    else:
-        return True
+def a_star(target):
+    open_list = []
+    closed_list = []
+    open_list.append(target)
 
-############# OPERATIONS #################
+    while open_list:
+        open_list.sort(key=lambda x: x.f())
+        node = open_list.pop(0)
 
-def move_up(arr, target):
-    if not container_above(arr, target):
-        y = target[0]-1
-        x = target[1]-1
-        arr[y][x], arr[y+1][x] = arr[y+1][x], arr[y][x]
-        target = (y+2, x+1)
-    else:
-        print("Container in the way")
-        return target
+        if len(node.targets) < 1:
+            path = []
+            while node.parent:
+                path.append(node)
+                node = node.parent
+            path.append(node)
+            path.reverse()
 
-    return target
+            for node in path:
+                print(node.move)
+            
+            return True
+        
+        children = expand(node)
 
-def move_down(arr, target):
-    if not container_below(arr, target):
-        y = target[0]-1
-        x = target[1]-1
-        arr[y][x], arr[y-1][x] = arr[y-1][x], arr[y][x]
-        target = (y, x+1)
-    else:
-        print("Container in the way")
-        return target
+        for child in children:
+            if child.grid in closed_list:
+                continue
 
-    return target
+            same_grid_in_open_list = False
+            for n in open_list:
+                if n.grid == child.grid:
+                    same_grid_in_open_list = True
+                    if child.g < n.g:
+                        n.g = child.g
+                        n.parent = node
+                    break
+            if not same_grid_in_open_list:
+                child.g = node.g + 1
+                child.h = manhattan(child)
+                open_list.append(child)
+                child.parent = node
+            
+            closed_list.append(child.grid)
 
-def move_left(arr, target):
-    if not container_left(arr, target):
-        y = target[0]-1
-        x = target[1]-1
-        arr[y][x], arr[y][x-1] = arr[y][x-1], arr[y][x]
-        target = (y+1, x)
-    else:
-        print("Container in the way")
-        return target
+    print("Could not find path")
+    return None
 
-def move_right(arr, target):
-    if not container_right(arr, target):
-        y = target[0]-1
-        x = target[1]-1
-        arr[y][x], arr[y][x+1] = arr[y][x+1], arr[y][x]
-        target = (y+1, x+2)
-    else:
-        print("Container in the way")
-        return target
+def manhattan(node):
+    h = 0
 
-
-############### READ MANIFEST ##################
-
-def make_arr(file):
-    arr = [[None for x in range(12)] for y in range(8)]
-
+def read_manifest(file):
+    grid = [[None for x in range(12)] for y in range(8)]
     for line in file:
         parts = line.strip().split(", ")
         if len(parts) != 3:
             continue
-
-        y, x = parts[0].strip("[]").split(",")
+        y,x = parts[0].strip("[]").split(",")
         weight = parts[1].strip("{}")
-        info = parts[2]
+        desc = parts[2]
 
-        tuple = (weight, info)
-        arr[int(y)-1][int(x)-1] = tuple
+        if (desc == "UNUSED"):
+            grid[int(y)-1][int(x)-1] = 0
+        elif (desc == "NAN"):
+            grid[int(y)-1][int(x)-1] = 2
+        else:
+            grid[int(y)-1][int(x)-1] = 1
+        
+        target_node = Node(grid, None, None, 0, 0, None)
 
-    return arr
-
+    return grid
 
 if __name__ == "__main__":
-    file = open('ShipCase3.txt', 'r')
-    target = (1, 3)
+    file = open('ShipCase4.txt')
+    target_node = read_manifest(file)
 
-    arr = make_arr(file)
-
-    print(target)
-    target = move_up(arr, target)
-    print(target)
-    target = move_right(arr, target)
-    print(target)
-    target = move_right(arr, target)
-    target = move_down(arr, target)
-    print(target)
+    containers = 1
