@@ -42,8 +42,7 @@ def expand(node):
         if i > 0 and node.grid[i-1][j] == 0:
             new_grid = [row[:] for row in node.grid]
             new_grid[i][j], new_grid[i-1][j] = new_grid[i-1][j], new_grid[i][j]
-            new_node = Node(new_grid, node.target, node.empty, node, node.g+1, node.h, f"({i}, {j})-->({i-1}, {j})")
-            new_node.h = manhattan(new_node)
+            new_node = Node(new_grid, node.target, node.empty, node, node.g, node.h, f"({i}, {j})-->({i-1}, {j})")
             if new_node.grid[i-2][j] == 1 or new_node.grid[i-2][j] == 2:
                 new_node.airborn_container = None
 
@@ -57,8 +56,7 @@ def expand(node):
         if j < 11 and node.grid[i][j+1] == 0 and not container_above(node, i, j):
             new_grid = [row[:] for row in node.grid]
             new_grid[i][j], new_grid[i][j+1] = new_grid[i][j+1], new_grid[i][j]
-            new_node = Node(new_grid, node.target, node.empty, node, node.g+1, node.h, f"({i}, {j})-->({i}, {j+1})")
-            new_node.h = manhattan(new_node)
+            new_node = Node(new_grid, node.target, node.empty, node, node.g, node.h, f"({i}, {j})-->({i}, {j+1})")
             if new_node.grid[i-1][j+1] == 1:
                 new_node.airborn_container = None
             else:
@@ -99,10 +97,6 @@ def a_star(target):
         children = expand(node)
 
         for child in children:
-            # print(child)
-            # print(child.target)
-            # print(child.h)
-            # print("\n")  
             if child.grid in closed_list:
                 continue
 
@@ -127,6 +121,7 @@ def a_star(target):
 
 def manhattan(node):
     h = 0
+    h += 1
     h += abs(node.target[0] - node.empty[0]) + abs(node.target[1] - node.empty[1])
     return h
 

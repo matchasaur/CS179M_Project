@@ -57,7 +57,7 @@ def expand(node):
                 new_grid = [row[:] for row in node.grid]
                 new_grid[i][j], new_grid[i+1][j] = new_grid[i+1][j], new_grid[i][j]
                 new_targets = [(t[0]+1,t[1]) if t[0]==i and t[1]==j else t for t in node.targets]
-                new_node = Node(new_grid, new_targets, node, node.g, node.h, f"({i}, {j})-->({i+1}, {j})")
+                new_node = Node(new_grid, new_targets, node, node.g+1, node.h, f"({i}, {j}),({i+1}, {j})")
                 new_node.airborn_container = (i+1, j)
                 children.append(new_node)
 
@@ -66,7 +66,7 @@ def expand(node):
                 new_grid = [row[:] for row in node.grid]
                 new_grid[i][j], new_grid[i-1][j] = new_grid[i-1][j], new_grid[i][j]
                 new_targets = [(t[0]-1,t[1]) if t[0]==i and t[1]==j else t for t in node.targets]
-                new_node = Node(new_grid, new_targets, node, node.g, node.h, f"({i}, {j})-->({i-1}, {j})")
+                new_node = Node(new_grid, new_targets, node, node.g+1, node.h, f"({i}, {j}),({i-1}, {j})")
                 if new_node.grid[i-2][j] == 1 or new_node.grid[i-2][j] == 2:
                     new_node.airborn_container = None
                 else:
@@ -78,7 +78,7 @@ def expand(node):
                 new_grid = [row[:] for row in node.grid]
                 new_grid[i][j], new_grid[i][j-1] = new_grid[i][j-1], new_grid[i][j]
                 new_targets = [(t[0],t[1]-1) if t[0]==i and t[1]==j else t for t in node.targets]
-                new_node = Node(new_grid, new_targets, node, node.g, node.h, f"({i}, {j})-->({i}, {j-1})")
+                new_node = Node(new_grid, new_targets, node, node.g+1, node.h, f"({i}, {j}),({i}, {j-1})")
                 if new_node.grid[i-1][j-1] == 1:
                     new_node.airborn_container = None
                 else:
@@ -90,7 +90,7 @@ def expand(node):
                 new_grid = [row[:] for row in node.grid]
                 new_grid[i][j], new_grid[i][j+1] = new_grid[i][j+1], new_grid[i][j]
                 new_targets = [(t[0],t[1]+1) if t[0]==i and t[1]==j else t for t in node.targets]
-                new_node = Node(new_grid, new_targets, node, node.g, node.h, f"({i}, {j})-->({i}, {j+1})")
+                new_node = Node(new_grid, new_targets, node, node.g+1, node.h, f"({i}, {j}),({i}, {j+1})")
                 if new_node.grid[i-1][j+1] == 1:
                     new_node.airborn_container = None
                 else:
@@ -119,7 +119,7 @@ def expand(node):
                         new_grid = [row[:] for row in node.grid]
                         new_grid[i][j], new_grid[i+1][j] = new_grid[i+1][j], new_grid[i][j]
                         new_targets = [(t[0]+1,t[1]) if t[0]==i and t[1]==j else t for t in node.targets]
-                        new_node = Node(new_grid, new_targets, node, node.g, node.h, f"({i}, {j})-->({i+1}, {j})")
+                        new_node = Node(new_grid, new_targets, node, node.g+1, node.h, f"({i}, {j}),({i+1}, {j})")
                         new_node.airborn_container = (i+1, j)
                         children.append(new_node)
 
@@ -128,7 +128,7 @@ def expand(node):
                         new_grid = [row[:] for row in node.grid]
                         new_grid[i][j], new_grid[i-1][j] = new_grid[i-1][j], new_grid[i][j]
                         new_targets = [(t[0]-1,t[1]) if t[0]==i and t[1]==j else t for t in node.targets]
-                        new_node = Node(new_grid, new_targets, node, node.g, node.h, f"({i}, {j})-->({i-1}, {j})")
+                        new_node = Node(new_grid, new_targets, node, node.g+1, node.h, f"({i}, {j}),({i-1}, {j})")
                         if new_node.grid[i-1][j] == 0:
                             new_node.airborn_container = (i,j)
                         children.append(new_node)
@@ -138,7 +138,7 @@ def expand(node):
                         new_grid = [row[:] for row in node.grid]
                         new_grid[i][j], new_grid[i][j-1] = new_grid[i][j-1], new_grid[i][j]
                         new_targets = [(t[0],t[1]-1) if t[0]==i and t[1]==j else t for t in node.targets]
-                        new_node = Node(new_grid, new_targets, node, node.g, node.h, f"({i}, {j})-->({i}, {j-1})")
+                        new_node = Node(new_grid, new_targets, node, node.g+1, node.h, f"({i}, {j}),({i}, {j-1})")
                         if new_node.grid[i-1][j-1] == 0:
                             new_node.airborn_container = (i,j-1)
                         children.append(new_node)
@@ -148,7 +148,7 @@ def expand(node):
                         new_grid = [row[:] for row in node.grid]
                         new_grid[i][j], new_grid[i][j+1] = new_grid[i][j+1], new_grid[i][j]
                         new_targets = [(t[0],t[1]+1) if t[0]==i and t[1]==j else t for t in node.targets]
-                        new_node = Node(new_grid, new_targets, node, node.g, node.h, f"({i}, {j})-->({i}, {j+1})")
+                        new_node = Node(new_grid, new_targets, node, node.g+1, node.h, f"({i}, {j}),({i}, {j+1})")
                         if new_node.grid[i-1][j+1] == 0:
                             new_node.airborn_container = (i,j+1)
                         children.append(new_node)
@@ -174,7 +174,7 @@ def a_star(target):
                 node = node.parent
             path.append(node)
             path.reverse()
-
+            # write_manifest(path)
             for node in path:
                 if node.move:
                     print(node.move)
@@ -211,11 +211,13 @@ def a_star(target):
     print("Could not find path")
     return None
 
-def manhattan(node):
-    h = 0
-    for target in node.targets:
-        h += abs(target[0] - 7) + abs(target[1])
-    return h
+
+# def manhattan(node):
+#     h = 0
+#     for target in node.targets:
+#         h += 1
+#         h += abs(target[0] - 7) + abs(target[1])
+#     return h
 
 def read_manifest(file, targets):
     grid = [[None for x in range(12)] for y in range(8)]
@@ -242,8 +244,15 @@ def read_manifest(file, targets):
 
     return target_node, target_containers
 
+def write_manifest(path):
+    
+    for node in path:
+        if node.move is not None and node.move != "unload":
+            y_1, x_1, y_2, x_2 = [int(num.strip("()")) for num in node.move.split(",")]
+            print(f"{y_1}, {x_1}, {y_2}, {x_2}")
+
 def start_unload():
-    file = open('ShipCase3.txt')
+    file = open('ShipCase4.txt')
 
     targets = []
     num = input("How many containers will you be unloading? ")
@@ -254,12 +263,10 @@ def start_unload():
         targets.append((int(weight), str(contents)))
 
     target_node, target_containers = read_manifest(file, targets)
+    print(target_containers)
     target_node.targets = target_containers
     print(targets)
     a_star(target_node)
-    
-
-
 
 if __name__ == "__main__":
     start_unload()
