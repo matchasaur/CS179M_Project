@@ -42,7 +42,7 @@ def expand(node):
         if i > 0 and node.grid[i-1][j] == 0:
             new_grid = [row[:] for row in node.grid]
             new_grid[i][j], new_grid[i-1][j] = new_grid[i-1][j], new_grid[i][j]
-            new_node = Node(new_grid, node.target, node.empty, node, node.g, node.h, f"({i}, {j})-->({i-1}, {j})")
+            new_node = Node(new_grid, node.target, node.empty, node, node.g, node.h, f"({i}, {j}),({i-1}, {j})")
             if new_node.grid[i-2][j] == 1 or new_node.grid[i-2][j] == 2:
                 new_node.airborn_container = None
 
@@ -56,7 +56,7 @@ def expand(node):
         if j < 11 and node.grid[i][j+1] == 0 and not container_above(node, i, j):
             new_grid = [row[:] for row in node.grid]
             new_grid[i][j], new_grid[i][j+1] = new_grid[i][j+1], new_grid[i][j]
-            new_node = Node(new_grid, node.target, node.empty, node, node.g, node.h, f"({i}, {j})-->({i}, {j+1})")
+            new_node = Node(new_grid, node.target, node.empty, node, node.g, node.h, f"({i}, {j}),({i}, {j+1})")
             if new_node.grid[i-1][j+1] == 1:
                 new_node.airborn_container = None
             else:
@@ -67,7 +67,8 @@ def expand(node):
     return children
 
 
-def a_star(target):
+def a_star(target, targets, tuples):
+    f = open('operations.txt', 'w')
     open_list = []
     closed_list = []
     open_list.append(target)
@@ -80,18 +81,18 @@ def a_star(target):
 
         if node.target == node.empty:
             path = []
-            print("\n")
             while node.parent:
                 path.append(node)
                 node = node.parent
             path.append(node)
             path.reverse()
 
+            write_manifest(path, targets, tuples)
             for node in path:
                 if node.move:
-                    print(node.move)
-            
-            print("Load")
+                    f.write(node.move)
+                    f.write("\n")
+            print("load")
             return node
         
         children = expand(node)
@@ -133,6 +134,7 @@ def find_empty(node):
 
 def read_manifest(file):
     grid = [[None for x in range(12)] for y in range(8)]
+    tuples = [[None for x in range(12)] for y in range(8)]
     for line in file:
         parts = line.strip().split(", ")
         if len(parts) != 3:
@@ -140,6 +142,7 @@ def read_manifest(file):
         y,x = parts[0].strip("[]").split(",")
         weight = parts[1].strip("{}")
         desc = parts[2]
+        tuples[int(y)-1][int(x)-1] = (y, x, weight, desc)
 
         if (desc == "UNUSED"):
             grid[int(y)-1][int(x)-1] = 0
@@ -150,19 +153,50 @@ def read_manifest(file):
         
         target_node = Node(grid, (7,0), None, None, 0, 0, None)
 
-    return target_node
+    return target_node, tuples
+
+def write_manifest(path, targets, tuples):
+    updated_manifest = open('updated_manifest.txt', 'w')
+    for i in range(len(targets)):
+        weight = '{:0>5}'.format(targets[i][0])
+        desc = targets[i][1]
+        tuples[7][0] = ('08','01', str(weight), str(desc))
+        for node in path:
+            if node.move == "load":
+                continue
+            elif node.move is not None:
+                y_1, x_1, y_2, x_2 = [int(num.strip("()")) for num in node.move.split(",")]
+                if len(str(y_1)) < 2:
+                    y_1 = '0' + str(y_1+1)
+                if len(str(x_1)) < 2:
+                    x_1 = '0' + str(x_1+1)
+                if len(str(y_2)) < 2:
+                    y_2 = '0' + str(y_2+1)
+                if len(str(x_2)) < 2:
+                    x_2 = '0' + str(x_2+1)
+                # tuples[y_1][x_1][-2:], tuples[y_2][x_2][-2:] = tuples[y_2][x_2][-2:], tuples[y_1][x_1][-2:]
+                temp1 = (str(y_1), str(x_1), tuples[int(y_2)-1][int(x_2)-1][2], tuples[int(y_2)-1][int(x_2)-1][3])
+                temp2 = (str(y_2), str(x_2), tuples[int(y_1)-1][int(x_1)-1][2], tuples[int(y_1)-1][int(x_1)-1][3])
+                tuples[int(y_1)-1][int(x_1)-1] = temp1
+                tuples[int(y_2)-1][int(x_2)-1] = temp2
+
+        for tup in tuples:
+            for i in range(12):
+                updated_manifest.write(str(f"[{tup[i][0]},{tup[i][1]}], {{{tup[i][2]}}}, {tup[i][3]}").strip("()"))
+                updated_manifest.write("\n")
+    print("Manifest updated.")
 
 def start_loading():
     file = open('ShipCase3.txt')
     targets = []
     num = input("How many containers will you be loading? ")
-    print("Please provide the weight and contents of each container (weight, contanents):")
+    print("Please provide the weight and contents of each container (weight, contents):")
     for i in range(int(num)):
         user_input = input()
         weight, contents = user_input.split(", ")
         targets.append((int(weight), str(contents)))
 
-    target_node = read_manifest(file)
+    target_node, tuples = read_manifest(file)
     for i in range(int(num)):
         empty = find_empty(target_node)
         target_node.empty = empty
@@ -172,7 +206,7 @@ def start_loading():
         target_node.target = (7,0)
         target_node.move = None
 
-        target_node = a_star(target_node)
+        target_node = a_star(target_node, targets, tuples)
 
 
 if __name__ == "__main__":

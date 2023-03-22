@@ -155,7 +155,7 @@ def expand(node):
 
     return children
 
-def a_star(target):
+def a_star(target, tuples):
     f = open('operations.txt', 'w')
 
     open_list = []
@@ -174,13 +174,12 @@ def a_star(target):
                 node = node.parent
             path.append(node)
             path.reverse()
-            # write_manifest(path)
+            write_manifest(path, tuples)
             for node in path:
                 if node.move:
-                    print(node.move)
                     f.write(node.move)
                     f.write("\n")
-
+            print("Successfully unloaded.")
             f.close()
             return True
 
@@ -212,15 +211,16 @@ def a_star(target):
     return None
 
 
-# def manhattan(node):
-#     h = 0
-#     for target in node.targets:
-#         h += 1
-#         h += abs(target[0] - 7) + abs(target[1])
-#     return h
+def manhattan(node):
+    h = 0
+    for target in node.targets:
+        h += 1
+        h += abs(target[0] - 7) + abs(target[1])
+    return h
 
 def read_manifest(file, targets):
     grid = [[None for x in range(12)] for y in range(8)]
+    tuples = [[None for x in range(12)] for y in range(8)]
     target_containers = []
     for line in file:
         parts = line.strip().split(", ")
@@ -229,6 +229,7 @@ def read_manifest(file, targets):
         y,x = parts[0].strip("[]").split(",")
         weight = parts[1].strip("{}")
         desc = parts[2]
+        tuples[int(y)-1][int(x)-1] = (y,x,weight,desc)
 
         if (int(weight), desc) in targets:
             target_containers.append((int(y)-1, int(x)-1))
@@ -242,17 +243,37 @@ def read_manifest(file, targets):
         
         target_node = Node(grid, None, None, 0, 0, None)
 
-    return target_node, target_containers
+    return target_node, target_containers, tuples
 
-def write_manifest(path):
-    
+def write_manifest(path, tuples):
+    updated_manifest = open('updated_manifest.txt', 'w')
     for node in path:
-        if node.move is not None and node.move != "unload":
+        if node.move == "unload":
+            tuples[7][0] = ('08','01', '00000', 'UNUSED')
+        elif node.move is not None:
             y_1, x_1, y_2, x_2 = [int(num.strip("()")) for num in node.move.split(",")]
-            print(f"{y_1}, {x_1}, {y_2}, {x_2}")
+            if len(str(y_1)) < 2:
+                y_1 = '0' + str(y_1+1)
+            if len(str(x_1)) < 2:
+                x_1 = '0' + str(x_1+1)
+            if len(str(y_2)) < 2:
+                y_2 = '0' + str(y_2+1)
+            if len(str(x_2)) < 2:
+                x_2 = '0' + str(x_2+1)
+            # tuples[y_1][x_1][-2:], tuples[y_2][x_2][-2:] = tuples[y_2][x_2][-2:], tuples[y_1][x_1][-2:]
+            temp1 = (str(y_1), str(x_1), tuples[int(y_2)-1][int(x_2)-1][2], tuples[int(y_2)-1][int(x_2)-1][3])
+            temp2 = (str(y_2), str(x_2), tuples[int(y_1)-1][int(x_1)-1][2], tuples[int(y_1)-1][int(x_1)-1][3])
+            tuples[int(y_1)-1][int(x_1)-1] = temp1
+            tuples[int(y_2)-1][int(x_2)-1] = temp2
+
+    for tup in tuples:
+        for i in range(12):
+            updated_manifest.write(str(f"[{tup[i][0]},{tup[i][1]}], {{{tup[i][2]}}}, {tup[i][3]}").strip("()"))
+            updated_manifest.write("\n")
+    print("Manifest updated.")
 
 def start_unload():
-    file = open('ShipCase4.txt')
+    file = open('ShipCase1.txt')
 
     targets = []
     num = input("How many containers will you be unloading? ")
@@ -262,11 +283,9 @@ def start_unload():
         weight, contents = user_input.split(", ")
         targets.append((int(weight), str(contents)))
 
-    target_node, target_containers = read_manifest(file, targets)
-    print(target_containers)
+    target_node, target_containers, tuples = read_manifest(file, targets)
     target_node.targets = target_containers
-    print(targets)
-    a_star(target_node)
+    a_star(target_node, tuples)
 
 if __name__ == "__main__":
     start_unload()
