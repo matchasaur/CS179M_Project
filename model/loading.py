@@ -35,31 +35,36 @@ def container_below(node, y, x):
     
 def expand(node):
     children = []
+    if node.airborn_container is not None:
+        i,j = node.airborn_container
 
-    i,j = node.airborn_container
+        # Move down
+        if i > 0 and node.grid[i-1][j] == 0:
+            new_grid = [row[:] for row in node.grid]
+            new_grid[i][j], new_grid[i-1][j] = new_grid[i-1][j], new_grid[i][j]
+            new_node = Node(new_grid, node.target, node.empty, node, node.g+1, node.h, f"({i}, {j})-->({i-1}, {j})")
+            new_node.h = manhattan(new_node)
+            if new_node.grid[i-2][j] == 1 or new_node.grid[i-2][j] == 2:
+                new_node.airborn_container = None
 
-    if i > 0 and node.grid[i-1][j] == 0:
-        print("sldflkj")
-        new_grid = [row[:] for row in node.grid]
-        new_grid[i][j], new_grid[i-1][j] = new_grid[i-1][j], new_grid[i][j]
-        # new_targets = [(t[0]-1,t[1]) if t[0]==i and t[1]==j else t for t in node.targets]
-        new_node = Node(new_grid, node.target, node.empty, node, node.g, node.h, f"({i}, {j})-->({i-1}, {j})")
-        if new_node.grid[i-2][j] == 1 or new_node.grid[i-2][j] == 2:
-            new_node.airborn_container = None
-        else:
-            new_node.airborn_container = (i-1,j)
-        children.append(new_node)
+            else:
+                new_node.airborn_container = (i-1,j)
 
-    if j < 11 and node.grid[i][j+1] == 0 and not container_above(node, i, j):
-        new_grid = [row[:] for row in node.grid]
-        new_grid[i][j], new_grid[i][j+1] = new_grid[i][j+1], new_grid[i][j]
-        # new_targets = [(t[0],t[1]+1) if t[0]==i and t[1]==j else t for t in node.targets]
-        new_node = Node(new_grid, node.target, node.empty, node, node.g, node.h, f"({i}, {j})-->({i}, {j+1})")
-        if new_node.grid[i-1][j+1] == 1:
-            new_node.airborn_container = None
-        else:
-            new_node.airborn_container = (i,j+1)
-        children.append(new_node)
+            new_node.target = (i-1,j)
+            children.append(new_node)
+
+        # Move right
+        if j < 11 and node.grid[i][j+1] == 0 and not container_above(node, i, j):
+            new_grid = [row[:] for row in node.grid]
+            new_grid[i][j], new_grid[i][j+1] = new_grid[i][j+1], new_grid[i][j]
+            new_node = Node(new_grid, node.target, node.empty, node, node.g+1, node.h, f"({i}, {j})-->({i}, {j+1})")
+            new_node.h = manhattan(new_node)
+            if new_node.grid[i-1][j+1] == 1:
+                new_node.airborn_container = None
+            else:
+                new_node.airborn_container = (i,j+1)
+            new_node.target = (i, j+1)
+            children.append(new_node)
 
     return children
 
@@ -68,13 +73,16 @@ def a_star(target):
     open_list = []
     closed_list = []
     open_list.append(target)
+    target.g = 0
+    target.h = 0
 
     while open_list:
         open_list.sort(key=lambda x: x.f())
         node = open_list.pop(0)
 
-        if node.airborn_container is None:
+        if node.target == node.empty:
             path = []
+            print("\n")
             while node.parent:
                 path.append(node)
                 node = node.parent
@@ -82,17 +90,21 @@ def a_star(target):
             path.reverse()
 
             for node in path:
-                print(node.move)
+                if node.move:
+                    print(node.move)
             
-            return True
+            print("Load")
+            return node
         
         children = expand(node)
 
         for child in children:
+            # print(child)
+            # print(child.target)
+            # print(child.h)
+            # print("\n")  
             if child.grid in closed_list:
                 continue
-            print("\n")
-            print(child)
 
             same_grid_in_open_list = False
             for n in open_list:
@@ -122,7 +134,7 @@ def find_empty(node):
     for i in range(len(node.grid)):
         for j in range(len(node.grid[i])):
             if node.grid[i][j] == 0:
-                return (i,j)
+                return (i, j)
 
 def read_manifest(file):
     grid = [[None for x in range(12)] for y in range(8)]
@@ -145,15 +157,29 @@ def read_manifest(file):
 
     return target_node
 
-if __name__ == "__main__":
-    file = open('ShipCase4.txt')
+def start_loading():
+    file = open('ShipCase3.txt')
+    targets = []
+    num = input("How many containers will you be loading? ")
+    print("Please provide the weight and contents of each container (weight, contanents):")
+    for i in range(int(num)):
+        user_input = input()
+        weight, contents = user_input.split(", ")
+        targets.append((int(weight), str(contents)))
+
     target_node = read_manifest(file)
+    for i in range(int(num)):
+        empty = find_empty(target_node)
+        target_node.empty = empty
+        target_node.airborn_container = (7,0)
+        target_node.grid[7][0] = 1
+        target_node.parent = None
+        target_node.target = (7,0)
+        target_node.move = None
+
+        target_node = a_star(target_node)
+
+
+if __name__ == "__main__":
+    start_loading()
     
-    empty = find_empty(target_node)
-    target_node.empty = empty
-    target_node.airborn_container = (7,0)
-    target_node.grid[7][0] = 1
-
-    a_star(target_node)
-
-    containers = 1
