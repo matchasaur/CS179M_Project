@@ -39,8 +39,6 @@ def expand(node):
 
     if node.airborn_container is not None:
         i, j = node.airborn_container
-        print("Test 101")
-        print(f"{node.grid[i][j]} and {node.grid[i-1][j]}")
 
         for target in node.targets:
                 if target == (i,j) and (i,j) == (7,0):
@@ -65,7 +63,6 @@ def expand(node):
 
                     # Move container down
             if i > 0 and node.grid[i-1][j] == 0:
-                print("sldflkj")
                 new_grid = [row[:] for row in node.grid]
                 new_grid[i][j], new_grid[i-1][j] = new_grid[i-1][j], new_grid[i][j]
                 new_targets = [(t[0]-1,t[1]) if t[0]==i and t[1]==j else t for t in node.targets]
@@ -171,7 +168,6 @@ def a_star(target):
         # closed_list.append(node)
 
         if len(node.targets) < 1:
-            print("Success")
             path = []
             while node.parent:
                 path.append(node)
@@ -180,8 +176,8 @@ def a_star(target):
             path.reverse()
 
             for node in path:
-                print(node.move)
                 if node.move:
+                    print(node.move)
                     f.write(node.move)
                     f.write("\n")
 
@@ -193,12 +189,6 @@ def a_star(target):
         for child in children:
             if child.grid in closed_list:
                 continue
-            print("\n")
-            print(child)
-            print(child.targets)
-            print(child.f())
-            print(child.move)
-            print(child.airborn_container)
 
             same_grid_in_open_list = False
             for n in open_list:
@@ -227,8 +217,9 @@ def manhattan(node):
         h += abs(target[0] - 7) + abs(target[1])
     return h
 
-def read_manifest(file):
+def read_manifest(file, targets):
     grid = [[None for x in range(12)] for y in range(8)]
+    target_containers = []
     for line in file:
         parts = line.strip().split(", ")
         if len(parts) != 3:
@@ -236,6 +227,9 @@ def read_manifest(file):
         y,x = parts[0].strip("[]").split(",")
         weight = parts[1].strip("{}")
         desc = parts[2]
+
+        if (int(weight), desc) in targets:
+            target_containers.append((int(y)-1, int(x)-1))
         
         if (desc == "UNUSED"):
             grid[int(y)-1][int(x)-1] = 0
@@ -246,18 +240,27 @@ def read_manifest(file):
         
         target_node = Node(grid, None, None, 0, 0, None)
 
-    return target_node
+    return target_node, target_containers
+
+def start_unload():
+    file = open('ShipCase3.txt')
+
+    targets = []
+    num = input("How many containers will you be unloading? ")
+    print("Please provide the weight and contents of each container (weight, contents):")
+    for i in range(int(num)):
+        user_input = input()
+        weight, contents = user_input.split(", ")
+        targets.append((int(weight), str(contents)))
+
+    target_node, target_containers = read_manifest(file, targets)
+    target_node.targets = target_containers
+    print(targets)
+    a_star(target_node)
+    
+
 
 
 if __name__ == "__main__":
-    file = open('ShipCase4.txt')
-    target_node = read_manifest(file)
-    option = 0
-
-    # Unload
-    if option == 0:
-        target_node.targets = [(1,4), (5,4)]
-        a_star(target_node)
-    # Load
-    else:
-        pass
+    start_unload()
+    

@@ -16,20 +16,20 @@ class Node:
     def __str__(self):
         rows = []
         for row in self.grid:
-            rows.append(' '.join(str(cell[0]) for cell in row))
+            rows.append(' '.join(str(cell) for cell in row))
         return '\n'.join(rows)
 
 def container_above(node, y, x):
     if y > 6:
         return False
-    elif node.grid[y+1][x][0] == 1:
+    elif node.grid[y+1][x] == 1:
         return True
     return False
 
 def container_below(node, y, x):
     if y < 1:
         return True
-    elif node.grid[y-1][x][0] == 1 or node.grid[y-1][x][0] == 2:
+    elif node.grid[y-1][x] == 1 or node.grid[y-1][x] == 2:
         True
     return False
     
@@ -40,22 +40,22 @@ def expand(node):
     if node.airborn_container is not None:
         i, j = node.airborn_container
         print("Test 101")
-        print(f"{node.grid[i][j][0]} and {node.grid[i-1][j][0]}")
+        print(f"{node.grid[i][j]} and {node.grid[i-1][j]}")
 
         for target in node.targets:
                 if target == (i,j) and (i,j) == (7,0):
                     new_grid = [row[:] for row in node.grid]
                     node.targets.remove(target)
-                    new_grid[i][j][0] = 0
-                    new_grid[7][0][0] = 0
+                    new_grid[i][j] = 0
+                    new_grid[7][0] = 0
                     new_node = Node(new_grid, node.targets, node, node.g, node.h, "unload")
                     new_node.airborn_container = None
                     children.append(new_node)
 
-        if node.grid[i][j][0] == 1:
+        if node.grid[i][j] == 1:
 
                     # Move container up
-            if i < 7 and node.grid[i+1][j][0] == 0:
+            if i < 7 and node.grid[i+1][j] == 0:
                 new_grid = [row[:] for row in node.grid]
                 new_grid[i][j], new_grid[i+1][j] = new_grid[i+1][j], new_grid[i][j]
                 new_targets = [(t[0]+1,t[1]) if t[0]==i and t[1]==j else t for t in node.targets]
@@ -64,37 +64,37 @@ def expand(node):
                 children.append(new_node)
 
                     # Move container down
-            if i > 0 and node.grid[i-1][j][0] == 0:
+            if i > 0 and node.grid[i-1][j] == 0:
                 print("sldflkj")
                 new_grid = [row[:] for row in node.grid]
                 new_grid[i][j], new_grid[i-1][j] = new_grid[i-1][j], new_grid[i][j]
                 new_targets = [(t[0]-1,t[1]) if t[0]==i and t[1]==j else t for t in node.targets]
                 new_node = Node(new_grid, new_targets, node, node.g, node.h, f"({i}, {j})-->({i-1}, {j})")
-                if new_node.grid[i-2][j][0] == 1 or new_node.grid[i-2][j][0] == 2:
+                if new_node.grid[i-2][j] == 1 or new_node.grid[i-2][j] == 2:
                     new_node.airborn_container = None
                 else:
                     new_node.airborn_container = (i-1,j)
                 children.append(new_node)
 
                     # Move container left
-            if j > 0 and node.grid[i][j-1][0] == 0 and not container_above(node, i, j):
+            if j > 0 and node.grid[i][j-1] == 0 and not container_above(node, i, j):
                 new_grid = [row[:] for row in node.grid]
                 new_grid[i][j], new_grid[i][j-1] = new_grid[i][j-1], new_grid[i][j]
                 new_targets = [(t[0],t[1]-1) if t[0]==i and t[1]==j else t for t in node.targets]
                 new_node = Node(new_grid, new_targets, node, node.g, node.h, f"({i}, {j})-->({i}, {j-1})")
-                if new_node.grid[i-1][j-1][0] == 1:
+                if new_node.grid[i-1][j-1] == 1:
                     new_node.airborn_container = None
                 else:
                     new_node.airborn_container = (i,j-1)
                 children.append(new_node)
 
                     # Move container right
-            if j < 11 and node.grid[i][j+1][0] == 0 and not container_above(node, i, j):
+            if j < 11 and node.grid[i][j+1] == 0 and not container_above(node, i, j):
                 new_grid = [row[:] for row in node.grid]
                 new_grid[i][j], new_grid[i][j+1] = new_grid[i][j+1], new_grid[i][j]
                 new_targets = [(t[0],t[1]+1) if t[0]==i and t[1]==j else t for t in node.targets]
                 new_node = Node(new_grid, new_targets, node, node.g, node.h, f"({i}, {j})-->({i}, {j+1})")
-                if new_node.grid[i-1][j+1][0] == 1:
+                if new_node.grid[i-1][j+1] == 1:
                     new_node.airborn_container = None
                 else:
                     new_node.airborn_container = (i,j+1)
@@ -103,22 +103,22 @@ def expand(node):
     else:
         for i in range(len(node.grid)):
             for j in range(len(node.grid[i])):
-                if node.grid[i][j][0] == 2:
+                if node.grid[i][j] == 2:
                     continue
 
                 for target in node.targets:
                     if target[0] == i and target[1] == j and (i,j) == (7,0):
                         new_grid = [row[:] for row in node.grid]
                         node.targets.remove(target)
-                        new_grid[i][j][0] = 0
-                        new_grid[7][0][0] = 0
+                        new_grid[i][j] = 0
+                        new_grid[7][0] = 0
                         new_node = Node(new_grid, node.targets, node, node.g, node.h, "unload")
                         children.append(new_node)
 
                 if node.grid[i][j] == 1:
 
                     # Move container up
-                    if i < 7 and node.grid[i+1][j][0] == 0:
+                    if i < 7 and node.grid[i+1][j] == 0:
                         new_grid = [row[:] for row in node.grid]
                         new_grid[i][j], new_grid[i+1][j] = new_grid[i+1][j], new_grid[i][j]
                         new_targets = [(t[0]+1,t[1]) if t[0]==i and t[1]==j else t for t in node.targets]
@@ -127,32 +127,32 @@ def expand(node):
                         children.append(new_node)
 
                     # Move container down
-                    if i > 0 and node.grid[i-1][j][0] == 0:
+                    if i > 0 and node.grid[i-1][j] == 0:
                         new_grid = [row[:] for row in node.grid]
                         new_grid[i][j], new_grid[i-1][j] = new_grid[i-1][j], new_grid[i][j]
                         new_targets = [(t[0]-1,t[1]) if t[0]==i and t[1]==j else t for t in node.targets]
                         new_node = Node(new_grid, new_targets, node, node.g, node.h, f"({i}, {j})-->({i-1}, {j})")
-                        if new_node.grid[i-1][j][0] == 0:
+                        if new_node.grid[i-1][j] == 0:
                             new_node.airborn_container = (i,j)
                         children.append(new_node)
 
                     # Move container left
-                    if j > 0 and node.grid[i][j-1][0] == 0 and not container_above(node, i, j):
+                    if j > 0 and node.grid[i][j-1] == 0 and not container_above(node, i, j):
                         new_grid = [row[:] for row in node.grid]
                         new_grid[i][j], new_grid[i][j-1] = new_grid[i][j-1], new_grid[i][j]
                         new_targets = [(t[0],t[1]-1) if t[0]==i and t[1]==j else t for t in node.targets]
                         new_node = Node(new_grid, new_targets, node, node.g, node.h, f"({i}, {j})-->({i}, {j-1})")
-                        if new_node.grid[i-1][j-1][0] == 0:
+                        if new_node.grid[i-1][j-1] == 0:
                             new_node.airborn_container = (i,j-1)
                         children.append(new_node)
 
                     # Move container right
-                    if j < 11 and node.grid[i][j+1][0] == 0 and not container_above(node, i, j):
+                    if j < 11 and node.grid[i][j+1] == 0 and not container_above(node, i, j):
                         new_grid = [row[:] for row in node.grid]
                         new_grid[i][j], new_grid[i][j+1] = new_grid[i][j+1], new_grid[i][j]
                         new_targets = [(t[0],t[1]+1) if t[0]==i and t[1]==j else t for t in node.targets]
                         new_node = Node(new_grid, new_targets, node, node.g, node.h, f"({i}, {j})-->({i}, {j+1})")
-                        if new_node.grid[i-1][j+1][0] == 0:
+                        if new_node.grid[i-1][j+1] == 0:
                             new_node.airborn_container = (i,j+1)
                         children.append(new_node)
 
@@ -238,11 +238,11 @@ def read_manifest(file):
         desc = parts[2]
         
         if (desc == "UNUSED"):
-            grid[int(y)-1][int(x)-1] = (0, weight, desc)
+            grid[int(y)-1][int(x)-1] = 0
         elif (desc == "NAN"):
-            grid[int(y)-1][int(x)-1] = (2, weight, desc)
+            grid[int(y)-1][int(x)-1] = 2
         else:
-            grid[int(y)-1][int(x)-1] = (1, weight, desc)
+            grid[int(y)-1][int(x)-1] = 1
         
         target_node = Node(grid, None, None, 0, 0, None)
 
@@ -256,7 +256,7 @@ if __name__ == "__main__":
 
     # Unload
     if option == 0:
-        target_node.targets = [(1,4), (4,4)]
+        target_node.targets = [(1,4), (5,4)]
         a_star(target_node)
     # Load
     else:
