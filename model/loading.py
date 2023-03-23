@@ -156,38 +156,6 @@ def read_manifest(file):
 
     return target_node, tuples
 
-def write_manifest(path, targets, tuples):
-    updated_manifest = open('updated_manifest.txt', 'w')
-    for i in range(len(targets)):
-        weight = '{:0>5}'.format(targets[i][0])
-        desc = targets[i][1]
-        tuples[7][0] = ('08','01', str(weight), str(desc))
-        for node in path:
-            if node.move == "load":
-                continue
-            elif node.move is not None:
-                y_1, x_1, y_2, x_2 = [int(num.strip("()")) for num in node.move.split(",")]
-                y_1 += 1
-                x_1 += 1
-                y_2 += 1
-                x_2 += 1
-                
-                if len(str(y_1)) < 2:
-                    y_1 = '0' + str(y_1)
-                if len(str(x_1)) < 2:
-                    x_1 = '0' + str(x_1)
-                if len(str(y_2)) < 2:
-                    y_2 = '0' + str(y_2)
-                if len(str(x_2)) < 2:
-                    x_2 = '0' + str(x_2)
-                # tuples[y_1][x_1][-2:], tuples[y_2][x_2][-2:] = tuples[y_2][x_2][-2:], tuples[y_1][x_1][-2:]
-                print_manifest(tuples)
-                print("\n")
-                temp1 = (str(y_1), str(x_1), tuples[int(y_2)-1][int(x_2)-1][2], tuples[int(y_2)-1][int(x_2)-1][3])
-                temp2 = (str(y_2), str(x_2), tuples[int(y_1)-1][int(x_1)-1][2], tuples[int(y_1)-1][int(x_1)-1][3])
-                tuples[int(y_1)-1][int(x_1)-1] = temp1
-                tuples[int(y_2)-1][int(x_2)-1] = temp2
-
         print_manifest(tuples)
         for tup in tuples:
             for i in range(12):
