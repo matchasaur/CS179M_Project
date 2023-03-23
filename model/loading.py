@@ -67,8 +67,8 @@ def expand(node):
     return children
 
 
-def a_star(target, targets, tuples):
-    f = open('operations.txt', 'w')
+def a_star(target, targets, tuples, operations):
+    # f = open('operations.txt', 'w')
     open_list = []
     closed_list = []
     open_list.append(target)
@@ -90,10 +90,11 @@ def a_star(target, targets, tuples):
             write_manifest(path, targets, tuples)
             for node in path:
                 if node.move:
-                    f.write(node.move)
-                    f.write("\n")
+                    operations.write(node.move)
+                    operations.write("\n")
             print("load")
-            return node
+            operations.write("load\n")
+            return node, operations
         
         children = expand(node)
 
@@ -201,6 +202,7 @@ def print_manifest(tuples):
 
 def start_loading():
     file = open('ShipCase3.txt')
+    operations = open('operations.txt', 'w')
     targets = []
     num = input("How many containers will you be loading? ")
     print("Please provide the weight and contents of each container (weight, contents):")
@@ -219,8 +221,9 @@ def start_loading():
         target_node.target = (7,0)
         target_node.move = None
 
-        target_node = a_star(target_node, targets, tuples)
+        target_node, operations = a_star(target_node, targets, tuples, operations)
 
+    operations.close()
 
 if __name__ == "__main__":
     start_loading()
