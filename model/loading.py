@@ -175,16 +175,24 @@ def write_manifest(path, targets, tuples):
                 if len(str(x_2)) < 2:
                     x_2 = '0' + str(x_2+1)
                 # tuples[y_1][x_1][-2:], tuples[y_2][x_2][-2:] = tuples[y_2][x_2][-2:], tuples[y_1][x_1][-2:]
+                print_manifest(tuples)
+                print("\n")
                 temp1 = (str(y_1), str(x_1), tuples[int(y_2)-1][int(x_2)-1][2], tuples[int(y_2)-1][int(x_2)-1][3])
                 temp2 = (str(y_2), str(x_2), tuples[int(y_1)-1][int(x_1)-1][2], tuples[int(y_1)-1][int(x_1)-1][3])
                 tuples[int(y_1)-1][int(x_1)-1] = temp1
                 tuples[int(y_2)-1][int(x_2)-1] = temp2
 
+        print_manifest(tuples)
         for tup in tuples:
             for i in range(12):
                 updated_manifest.write(str(f"[{tup[i][0]},{tup[i][1]}], {{{tup[i][2]}}}, {tup[i][3]}").strip("()"))
                 updated_manifest.write("\n")
     print("Manifest updated.")
+
+def print_manifest(tuples):
+    for i in range(7,-1,-1):
+        row = [tuples[i][j][3].ljust(11) for j in range(11)]
+        print("".join(row))
 
 def start_loading():
     file = open('ShipCase3.txt')
