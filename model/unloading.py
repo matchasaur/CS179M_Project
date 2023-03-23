@@ -252,14 +252,20 @@ def write_manifest(path, tuples):
             tuples[7][0] = ('08','01', '00000', 'UNUSED')
         elif node.move is not None:
             y_1, x_1, y_2, x_2 = [int(num.strip("()")) for num in node.move.split(",")]
+            y_1 += 1
+            x_1 += 1
+            y_2 += 1
+            x_2 += 1
+
             if len(str(y_1)) < 2:
-                y_1 = '0' + str(y_1+1)
-            if len(str(x_1)) < 2:
-                x_1 = '0' + str(x_1+1)
-            if len(str(y_2)) < 2:
-                y_2 = '0' + str(y_2+1)
-            if len(str(x_2)) < 2:
-                x_2 = '0' + str(x_2+1)
+                y_1 = '0' + str(y_1)
+            if len(str(x_1+1)) < 2:
+                x_1 = '0' + str(x_1)
+            if len(str(y_2+1)) < 2:
+                y_2 = '0' + str(y_2)
+            if len(str(x_2+1)) < 2:
+                x_2 = '0' + str(x_2)
+            
             # tuples[y_1][x_1][-2:], tuples[y_2][x_2][-2:] = tuples[y_2][x_2][-2:], tuples[y_1][x_1][-2:]
             print_manifest(tuples)
             print("\n")
@@ -277,11 +283,11 @@ def write_manifest(path, tuples):
 
 def print_manifest(tuples):
     for i in range(7,-1,-1):
-        row = [tuples[i][j][3].ljust(11) for j in range(11)]
+        row = [tuples[i][j][3].ljust(12) for j in range(12)]
         print("".join(row))
 
 def start_unload():
-    file = open('ShipCase1.txt')
+    file = open('ShipCase6.txt')
 
     targets = []
     num = input("How many containers will you be unloading? ")
@@ -292,6 +298,7 @@ def start_unload():
         targets.append((int(weight), str(contents)))
 
     target_node, target_containers, tuples = read_manifest(file, targets)
+    print(target_containers)
     target_node.targets = target_containers
     a_star(target_node, tuples)
 

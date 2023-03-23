@@ -166,14 +166,19 @@ def write_manifest(path, targets, tuples):
                 continue
             elif node.move is not None:
                 y_1, x_1, y_2, x_2 = [int(num.strip("()")) for num in node.move.split(",")]
+                y_1 += 1
+                x_1 += 1
+                y_2 += 1
+                x_2 += 1
+                
                 if len(str(y_1)) < 2:
-                    y_1 = '0' + str(y_1+1)
+                    y_1 = '0' + str(y_1)
                 if len(str(x_1)) < 2:
-                    x_1 = '0' + str(x_1+1)
+                    x_1 = '0' + str(x_1)
                 if len(str(y_2)) < 2:
-                    y_2 = '0' + str(y_2+1)
+                    y_2 = '0' + str(y_2)
                 if len(str(x_2)) < 2:
-                    x_2 = '0' + str(x_2+1)
+                    x_2 = '0' + str(x_2)
                 # tuples[y_1][x_1][-2:], tuples[y_2][x_2][-2:] = tuples[y_2][x_2][-2:], tuples[y_1][x_1][-2:]
                 print_manifest(tuples)
                 print("\n")
