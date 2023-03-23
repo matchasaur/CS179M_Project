@@ -30,6 +30,8 @@ class Node:
         self.cargo = shipcargo
         self.balanceScore = self.calculateBalance(shipcargo)
         self.cost = 0
+        self.old = ''
+        self.new = ''
         
     def __lt__(self, other):
         Fn = self.cost + (1 - self.balanceScore)
@@ -109,6 +111,45 @@ class cargoHash():
             return True
         return False
 
+def writeToManifest(node):
+    final_manifest = open('final_manifest.txt', 'w')
+    cargo = node.cargo
+    for i in cargo:
+        for j in i:
+            y = str(j.y+1).zfill(2)
+            x = str(j.x+1).zfill(2)
+            weight = str(j.weight).zfill(5)
+            name = j.name
+            
+            final_manifest.write(str(f"[{y},{x}], {{{weight}}}, {name}\n"))
+            
+    print("Manifest finalized.")
+    final_manifest.close()
+
+def writeInstructions(node, parent):
+    instructions = ''
+    instructions = str(writeInstructionsHelp(node, parent, instructions))
+    balanceOperations = open('balance_operations.txt', 'w')
+    balanceOperations.write(str(instructions))
+    balanceOperations.close()
+    
+    
+def writeInstructionsHelp(node, parent, instructions):
+    #base case
+    if (parent[node] == None):
+        print("Found the root\n")
+        return ''
+    print("recurssion")
+    instructions += str(writeInstructionsHelp(parent[node], parent, instructions))
+    oldY = str(node.old[0])
+    oldX = str(node.old[1])
+    newY = str(node.new[0])
+    newX = str(node.new[1])
+    line = str(f"({oldY}, {oldX}),({newY}, {newX})\n")
+    instructions += line
+    return instructions
+    
+
 #Meat and Potatoes
 def search(start, listByWeight):
     #All visited nodes are placed into a set
@@ -134,8 +175,10 @@ def search(start, listByWeight):
         if isAdmissible(currNode):
             # print("Yo we found the goal!!!!!!!")
             print("Found admissible configuration:")
-            print("balanceScore: ", currNode.balanceScore, ', ', 'cost: ', currNode.cost*4)
+            print("balanceScore: ", currNode.balanceScore, ', ', 'Estimated Time: ', currNode.cost*4, 'minutes')
             displayCargo(currNode.cargo)
+            writeInstructions(currNode, parent)
+            writeToManifest(currNode)
             return currNode
 
         #Otherwise, we need to expand the nodes
@@ -159,7 +202,7 @@ def SIFT(start, listByWeight):
     queue.insert(copyStart, (1-copyStart.balanceScore) + copyStart.cost)
     # queue.insert(start)
     parent = {}
-    parent[start] = None
+    parent[copyStart] = None
 
     
     while not queue.isEmpty():
@@ -176,8 +219,10 @@ def SIFT(start, listByWeight):
         if (currNode.cost == 0):
             print("Constructed SIFT admissible configuration:")
             currNode.updateBalance()
-            print("balanceScore: ", currNode.balanceScore, ', ', 'cost: ', copyStart.cost*4)
+            print("balanceScore: ", currNode.balanceScore, ', ', 'Estimated Time: ', currNode.cost*4, 'minutes')
             displayCargo(currNode.cargo)
+            writeInstructions(currNode, parent)
+            writeToManifest(currNode)
             return currNode
 
         #Otherwise, we need to expand the nodes
@@ -255,6 +300,8 @@ def expandHelper(node, coordinates, queue, setOfVisitedNodes, parent):
             #////////////////////////////DEBUG MESSAGE////////////////////////////////
             # displayCargo(tempNode.cargo); print()
             if not setOfVisitedNodes.isRepeated(tempNode.cargo):
+                tempNode.old = coordinates
+                tempNode.new = (y,x)
                 newCost = manhatDist(coordinates[0], x, coordinates[1], y) + node.cost
                 tempNode.updateCost(newCost)
                 priority = newCost + (1 - tempNode.calculateBalance(tempNode.cargo))
@@ -299,6 +346,8 @@ def expandSIFTHelper(node, coordinates, queue, setOfVisitedNodes, parent, listBy
                 # print("Adding this state to the queue:")
                 # displayCargo(tempNode.cargo)
                 # print("Cost: ", newCost)
+                tempNode.old = coordinates
+                tempNode.new = (y,x)
                 priority = newCost
                 tempNode.balanceScore = 0
                 setOfVisitedNodes.insertItem(tempNode.cargo)
