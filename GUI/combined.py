@@ -1,3 +1,5 @@
+import shutil
+#copying files to desktop using shutil: https://docs.python.org/2/library/shutil.html#shutil.copyfile
 class Load_Node:
     def __init__(self, grid, target, empty, parent, g, h, move):
         self.grid = grid
@@ -604,6 +606,14 @@ if __name__ == "__main__":
         if option2 == 1:
             updated_manifest = open('OUTBOUND.txt')
             start_load(updated_manifest, operations, None)
-
+    # Source path
+    source = "C:/Users/aaron/OneDrive/Desktop/GUI/OUTBOUND.txt"
+ 
+    # Destination path
+    destination = "C:/Users/aaron/OneDrive/Desktop/OUTBOUND.txt"
+ 
+    # Copy the content of
+    # source to destination
+    shutil.copyfile(source, destination)
     manifest.close()
     operations.close()
