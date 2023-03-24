@@ -2,7 +2,8 @@ from queue import PriorityQueue
 import heapq
 import copy
 import timeit
-
+import shutil
+#copying files to desktop using shutil: https://docs.python.org/2/library/shutil.html#shutil.copyfile
 #PriorityQueue implementation
 class PriorityQueue:
     def __init__(self):
@@ -112,7 +113,7 @@ class cargoHash():
         return False
 
 def writeToManifest(node):
-    final_manifest = open('final_manifest.txt', 'w')
+    final_manifest = open('OUTBOUND.txt', 'w')
     cargo = node.cargo
     for i in cargo:
         for j in i:
@@ -405,7 +406,7 @@ if __name__ == "__main__":
     
     
     
-    file = open('ShipCase1.txt', 'r')
+    file = open('ShipCase4.txt', 'r')
     
     shipcargo = [[0] * columns for i in range(rows)]
     listByWeight = []
@@ -440,6 +441,15 @@ if __name__ == "__main__":
     stoptime = timeit.default_timer()
     execution_time = stoptime - starttime
     print("Program ran in ", "{0:.4f}".format(execution_time), " seconds.")
+        # Source path
+    source = "C:/Users/aaron/OneDrive/Desktop/GUI/OUTBOUND.txt"
+ 
+    # Destination path
+    destination = "C:/Users/aaron/OneDrive/Desktop/OUTBOUND.txt"
+ 
+    # Copy the content of
+    # source to destination
+    shutil.copyfile(source, destination)
     # print(testNode.balanceScore)
     # print(testNode.columnNotEmpty(5))
     

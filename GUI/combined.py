@@ -22,7 +22,7 @@ class Load_Node:
 def start_load(manifest, operations, bay_containers):
     targets = []
     if bay_containers != None:
-        file = open('updated_manifest.txt')
+        file = open('OUTBOUND.txt')
         for i in range(len(bay_containers)):
             weight = bay_containers[i][2]
             contents = bay_containers[i][3]
@@ -204,7 +204,7 @@ def print_load_manifest(tuples):
     print("\n")
 
 def write_load_manifest(path, targets, tuples):
-    updated_manifest = open('updated_manifest.txt', 'w')
+    updated_manifest = open('OUTBOUND.txt', 'w')
 
     weight = '{:0>5}'.format(targets[0])
     desc = targets[1]
@@ -517,7 +517,7 @@ def read_manifest(file, targets):
 # Path - Contains the operations (coordinates for swapping containers)
 # Tuples - Contains all container information (y, x, weight, description)
 def write_manifest(path, tuples):
-    updated_manifest = open('updated_manifest.txt', 'w')
+    updated_manifest = open('OUTBOUND.txt', 'w')
     bay_containers = []
     for node in path:
         if node.move == "unload target":
@@ -595,14 +595,14 @@ if __name__ == "__main__":
 
         option2 = int(input("Unload containers (1) or finish(2)? "))
         if option2 == 1:
-            updated_manifest = open('updated_manifest.txt')
+            updated_manifest = open('OUTBOUND.txt')
             start_unload(updated_manifest, operations)
     elif option == 2:
         start_unload(manifest, operations)
 
         option2 = int(input("Load containers (1) or finish (2)? "))
         if option2 == 1:
-            updated_manifest = open('updated_manifest.txt')
+            updated_manifest = open('OUTBOUND.txt')
             start_load(updated_manifest, operations, None)
 
     manifest.close()
