@@ -52,7 +52,6 @@ def start_load(manifest, operations, bay_containers):
         for i in range(int(num)):
             empty = find_empty(target_node)
             target_node.empty = empty
-            print(empty)
             if target_node.grid[6][0] == 1:
                 target_node.airborn_container = None
             else:
@@ -201,6 +200,7 @@ def print_load_manifest(tuples):
     for i in range(7,-1,-1):
         row = [tuples[i][j][3].ljust(11) for j in range(11)]
         print("".join(row))
+    print("\n")
 
 def write_load_manifest(path, targets, tuples):
     updated_manifest = open('updated_manifest.txt', 'w')
@@ -228,7 +228,6 @@ def write_load_manifest(path, targets, tuples):
                 x_2 = '0' + str(x_2)
             # tuples[y_1][x_1][-2:], tuples[y_2][x_2][-2:] = tuples[y_2][x_2][-2:], tuples[y_1][x_1][-2:]
             print_load_manifest(tuples)
-            print("\n")
             temp1 = (str(y_1), str(x_1), tuples[int(y_2)-1][int(x_2)-1][2], tuples[int(y_2)-1][int(x_2)-1][3])
             temp2 = (str(y_2), str(x_2), tuples[int(y_1)-1][int(x_1)-1][2], tuples[int(y_1)-1][int(x_1)-1][3])
             tuples[int(y_1)-1][int(x_1)-1] = temp1
