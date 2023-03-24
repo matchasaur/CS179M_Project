@@ -1,4 +1,6 @@
 from tkinter import *
+#tkinter documentation https://docs.python.org/3/library/tk.html
+#manifestbalance and manifestload functions from https://pythonguides.com/go-to-next-page-in-python-tkinter/  
 
 root = Tk()
 root.geometry('400x300')
@@ -7,13 +9,13 @@ root.title('Task Selection')
 
 f = ("Times bold", 14)
 
-def nextPage():
+def manifestbalance():
     root.destroy()
-    import page2
+    import manifestToLogBalance
 
-def prevPage():
+def manifestload():
     root.destroy()
-    import page3
+    import manifestToLogLoad
     
 Label(
     root,
@@ -27,14 +29,14 @@ Button(
     root, 
     text="Balance", 
     font=f,
-    command=nextPage
+    command=manifestbalance
     ).pack(fill=X, expand=TRUE, side=LEFT)
 
 Button(
     root, 
     text="Onload/Offload", 
     font=f,
-    command=prevPage
+    command=manifestload
     ).pack(fill=X, expand=TRUE, side=LEFT)
 
 root.mainloop()

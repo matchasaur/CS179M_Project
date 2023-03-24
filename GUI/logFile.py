@@ -1,8 +1,10 @@
 from tkinter import *
 from tkinter import filedialog
 import logging
-
-
+#tkinter documentation https://docs.python.org/3/library/tk.html
+#Logging code from https://docs.python.org/3/howto/logging.html
+#Code Template from https://pythonguides.com/python-tkinter-read-text-file/
+#get_value function from https://www.tutorialspoint.com/how-to-get-the-value-of-an-entry-widget-in-tkinter
 logger = logging.getLogger(__name__)
 
 logging.basicConfig(filename='LogFile.txt',format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M')
@@ -20,17 +22,14 @@ def openFile():
     tf.close()
 
 ws = Tk()
-ws.title("PythonGuides")
+ws.title("Log File")
 ws.geometry("1600x900")
-ws['bg']='#fb0'
 
 txtarea = Text(ws, width=40, height=20)
 txtarea.pack(pady=20)
 
 pathh = Entry(ws)
 pathh.pack(side=LEFT, expand=True, fill=X, padx=20)
-
-
 
 Button(
     ws, 
