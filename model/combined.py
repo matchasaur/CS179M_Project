@@ -121,6 +121,7 @@ def load_star(target, targets, tuples, operations):
                     operations.write(node.move)
                     operations.write("\n")
             operations.write("load\n")
+
             print("load")
             print("\n")
             return node, operations
@@ -234,11 +235,12 @@ def write_load_manifest(path, targets, tuples):
             tuples[int(y_2)-1][int(x_2)-1] = temp2
 
         print_load_manifest(tuples)
-        for tup in tuples:
-            for i in range(12):
-                updated_manifest.write(str(f"[{tup[i][0]},{tup[i][1]}], {{{tup[i][2]}}}, {tup[i][3]}").strip("()"))
-                updated_manifest.write("\n")
+    for tup in tuples:
+        for i in range(12):
+            updated_manifest.write(str(f"[{tup[i][0]},{tup[i][1]}], {{{tup[i][2]}}}, {tup[i][3]}").strip("()"))
+            updated_manifest.write("\n")
     print("Manifest updated.")
+    updated_manifest.close()
 
 ##########################################################
 ##########################################################
@@ -485,26 +487,30 @@ def read_manifest(file, targets):
     grid = [[None for x in range(12)] for y in range(8)]
     tuples = [[None for x in range(12)] for y in range(8)]
     target_containers = []
+
     for line in file:
         parts = line.strip().split(", ")
         if len(parts) != 3:
             continue
         y,x = parts[0].strip("[]").split(",")
         weight = parts[1].strip("{}")
-        desc = parts[2]
-        tuples[int(y)-1][int(x)-1] = (y,x,weight,desc)
+        description = parts[2]
+        tuples[int(y)-1][int(x)-1] = (y,x,weight,description)
 
-        if (int(weight), desc) in targets:
+        tup = (int(weight), description)
+        
+        if tup in targets:
             target_containers.append((int(y)-1, int(x)-1))
         
-        if (desc == "UNUSED"):
+        if (description == "UNUSED"):
             grid[int(y)-1][int(x)-1] = 0
-        elif (desc == "NAN"):
+        elif (description == "NAN"):
             grid[int(y)-1][int(x)-1] = 2
         else:
             grid[int(y)-1][int(x)-1] = 1
         
         target_node = Unload_Node(grid, None, None, 0, 0, None)
+
 
     return target_node, target_containers, tuples
 
@@ -551,7 +557,6 @@ def write_manifest(path, tuples):
     # pos -= 1
     # updated_manifest.truncate(pos)
 
-    updated_manifest.close()
     if bay_containers is not None:
         start_load(None, operations, bay_containers)
 
