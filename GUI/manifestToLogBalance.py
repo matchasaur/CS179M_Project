@@ -26,7 +26,7 @@ B0.grid(row=3, column=0)
    
 def nextPage():
     root.destroy()
-    import balance
+    import balancing
     
 B1=Button(root, text="Next", font=40, command=nextPage)
 B1.grid(row=4, column=0)
